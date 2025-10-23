@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Feedback Analyzer | Home</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import for a professional look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* Apply Inter font and smooth scrolling */
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Keyframe for a slight, repeating pulse animation on the button */
+        @keyframes pulse-once {
+            0% { transform: scale(1); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+            50% { transform: scale(1.01); box-shadow: 0 4px 20px rgba(59, 130, 246, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+        }
+
+        /* Keyframe for a subtle card entrance animation */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animated-card {
+            animation: slideIn 0.8s ease-out forwards;
+        }
+
+        .submit-button {
+            animation: pulse-once 3s infinite 2s; /* Initial delay of 2s */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- #################### HEADER #################### -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- Logo/Title -->
+            <div class="text-2xl font-extrabold text-gray-800 tracking-tight">
+                <span class="text-blue-600">Smart</span> Analyzer
+            </div>
+            
+            <!-- Desktop Navigation Links (Visible on medium screens and up) -->
+            <nav class="hidden md:flex space-x-4">
+                <a href="#" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">Home</a>
+               <a href="{% url 'aboutus' %}" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">About Us</a>
+               
+                <a href="{% url 'user_dashboard' %}" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">Dashboard</a>
+                <a href="{% url 'login' %}" class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 transition duration-300 shadow-md">Login</a>
+                <a href="{% url 'register' %}" class="border border-blue-500 text-blue-500 px-4 py-2 rounded-full font-medium hover:bg-blue-50 transition duration-300">Register</a>
+            </nav>
+
+            <!-- Mobile Menu Button (Visible only on small screens) -->
+            <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-blue-600 rounded-lg hover:bg-gray-100 transition duration-150">
+                <!-- SVG Icon for Hamburger Menu -->
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Drawer (Hidden by default, toggled by JS) -->
+        <nav id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-1 bg-gray-50 border-t border-gray-200 transition-all duration-300 ease-in-out">
+            <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-200">Home</a>
+           <a href="{% url 'aboutus' %}" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">About Us</a>
+                  
+            <a href="{% url 'user_dashboard' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-200">Dashboard</a>
+            <a href="{% url 'login' %}" class="block w-full px-3 py-2 rounded-full text-base font-medium text-white bg-blue-500 text-center hover:bg-blue-600 mt-2">Login</a>
+            <a href="{% url 'register' %}" class="block w-full px-3 py-2 rounded-full text-base font-medium text-blue-500 border border-blue-500 text-center hover:bg-blue-50 mt-1">Register</a>
+        </nav>
+    </header>
+
+    <!-- #################### MAIN CONTENT / HERO SECTION #################### -->
+    <main class="flex-grow flex flex-col justify-center items-center p-4 sm:p-8">
+        
+        <!-- Hero Section -->
+        <div class="text-center mb-12 max-w-4xl opacity-0 animated-card">
+            <h1 class="text-5xl sm:text-6xl font-extrabold text-gray-900 mb-4">
+                Unlock the <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-green-500">Power of Feedback</span>
+            </h1>
+            <p class="text-xl text-gray-500 mx-auto max-w-2xl">
+                The Smart Feedback Analysis System turns raw text into actionable, visualized insights. Submit your feedback anonymously below to contribute to the data loop.
+            </p>
+        </div>
+
+        <!-- Feedback Submission Card -->
+        <div class="w-full max-w-2xl bg-white p-6 sm:p-10 rounded-xl shadow-2xl border border-gray-100 animated-card" style="animation-delay: 0.3s; opacity: 0;">
+            <h3 class="text-3xl font-bold text-gray-700 mb-6 text-center">Anonymous Submission</h3>
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <label for="feedback_text" class="block text-lg font-medium text-gray-700 mb-2 text-left">
+                    Tell us what you think:
+                </label>
+                
+                <!-- Textarea with animated focus effect -->
+                <textarea 
+                    id="feedback_text" 
+                    name="feedback_text" 
+                    required 
+                    rows="6"
+                    placeholder="Enter your thoughts, suggestions, or comments here. We'll analyze the sentiment instantly."
+                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition duration-300 resize-none text-gray-700 shadow-inner"
+                ></textarea>
+                
+                <!-- Submit Button with Pulse Animation -->
+                <button 
+                    type="submit" 
+                    class="submit-button w-full mt-6 py-3 px-6 text-xl font-bold rounded-xl text-white 
+                           bg-gradient-to-r from-blue-600 to-indigo-600 
+                           hover:from-blue-700 hover:to-indigo-700 
+                           transition duration-300 transform hover:scale-[1.01]
+                           shadow-lg shadow-blue-300/50"
+                >
+                    Analyze & Submit Feedback
+                </button>
+            </form>
+
+            <p class="text-sm text-gray-400 mt-6">
+                *Your feedback is processed using AI-powered **Sentiment Analysis** and stored securely in MySQL.
+            </p>
+        </div>
+        
+    </main>
+
+    <!-- #################### FOOTER #################### -->
+    <footer class="bg-gray-800 text-white p-6 mt-12">
+        <div class="max-w-7xl mx-auto text-center md:flex md:justify-between md:items-center text-sm">
+            <p>&copy; 2025 Smart Feedback Analyzer. All rights reserved.</p>
+            <div class="mt-3 md:mt-0 space-x-4">
+                <a href="#" class="hover:text-blue-400 transition duration-200">System Overview</a>
+                <a href="#" class="hover:text-blue-400 transition duration-200">Legal Terms</a>
+                <a href="#" class="hover:text-blue-400 transition duration-200">Data Security</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- #################### JAVASCRIPT FOR MOBILE MENU #################### -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const button = document.getElementById('mobile-menu-button');
+            const menu = document.getElementById('mobile-menu');
+            
+            if (button && menu) {
+                // Event listener to toggle the 'hidden' class on click
+                button.addEventListener('click', () => {
+                    menu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

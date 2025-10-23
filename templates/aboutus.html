@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Smart Feedback Analysis and Visualization System</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import for a professional look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* Apply Inter font and smooth scrolling */
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Keyframe for a subtle card entrance animation */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animated-card {
+            animation: slideIn 0.8s ease-out forwards;
+        }
+        /* Ensure animations stagger based on order */
+        #introduction { animation-delay: 0.1s; }
+        #context-background { animation-delay: 0.2s; }
+        #features { animation-delay: 0.3s; }
+        #technologies { animation-delay: 0.4s; }
+        #development-approach { animation-delay: 0.5s; }
+        #our-mission { animation-delay: 0.6s; }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- #################### HEADER (Matching Index.html Style) #################### -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- Logo/Title -->
+            <div class="text-2xl font-extrabold text-gray-800 tracking-tight">
+                <span class="text-blue-600">Smart</span> Analyzer
+            </div>
+            
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex space-x-4">
+                <a href="/" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">Home</a>
+                <a href="{% url 'user_dashboard' %}" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">Dashboard</a>
+                <a href="#" class="text-blue-600 font-semibold transition duration-300 px-3 py-2 rounded-lg bg-blue-50/50">About Us</a>
+            </nav>
+
+            <!-- Mobile Menu Button (Visible only on small screens) -->
+            <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-blue-600 rounded-lg hover:bg-gray-100 transition duration-150">
+                <!-- SVG Icon for Hamburger Menu -->
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Drawer (Hidden by default, toggled by JS) -->
+        <nav id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-1 bg-gray-50 border-t border-gray-200 transition-all duration-300 ease-in-out">
+            <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-200">Home</a>
+            <a href="{% url 'user_dashboard' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-200">Dashboard</a>
+            <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 bg-blue-100/50">About Us</a>
+        </nav>
+    </header>
+
+    <!-- #################### MAIN CONTENT / HERO BANNER #################### -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-center py-16 px-4 shadow-xl">
+        <h1 class="text-4xl sm:text-5xl font-extrabold mb-2 opacity-0 animated-card" style="animation-delay: 0s;">
+            About the Smart Feedback Analyzer
+        </h1>
+        <p class="text-xl font-light opacity-0 animated-card" style="animation-delay: 0.1s;">
+            Discover the technology and mission behind our system.
+        </p>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 flex-grow">
+        
+        <!-- Introduction -->
+        <section id="introduction" class="mb-10 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100 opacity-0 animated-card">
+            <h2 class="text-3xl font-bold text-blue-600 mb-4">Introduction</h2>
+            <p class="text-gray-700 mb-4">The Smart Feedback Analysis and Visualization System is a full-stack web application designed to enable users to submit feedback through a responsive frontend interface. It processes the input in the backend using sentiment analysis, stores the data in a structured database, and visualizes the results using dynamic web-based charts.</p>
+            <p class="text-gray-700">This system demonstrates an integration of core web technologies including HTML, CSS, JavaScript, RESTful APIs, backend frameworks, and database management. By leveraging modern web technologies, REST APIs, and real-time data visualization, we transform user feedback into actionable insights instantly.</p>
+        </section>
+
+        <!-- Context and Background -->
+        <section id="context-background" class="mb-10 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100 opacity-0 animated-card">
+            <h2 class="text-3xl font-bold text-blue-600 mb-4">Context and Background</h2>
+            <p class="text-gray-700 mb-4">Feedback is essential for improving services, products, and user experience. Traditional feedback systems often lack real-time analysis and visualization. Our system addresses this by using web technologies like HTML, CSS, JavaScript, and backend frameworks (such as Django or Flask) to create dynamic and interactive applications.</p>
+            <p class="text-gray-700">By integrating sentiment analysis tools and visualization libraries, feedback is not just collected but transformed into meaningful insights, helping businesses and organizations make data-driven decisions.</p>
+        </section>
+
+        <!-- Key Features (Grid Layout for Responsiveness) -->
+        <section id="features" class="mb-10 bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100 opacity-0 animated-card">
+            <h2 class="text-3xl font-bold text-blue-600 mb-6 text-center">Key Features</h2>
+            <div class="grid md:grid-cols-2 gap-8 text-left">
+                <!-- Feature 1: User Roles -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2 border-b pb-1">User Roles</h3>
+                    <ul class="list-disc pl-5 space-y-1 text-gray-600">
+                        <li><strong>Guest:</strong> Can submit feedback anonymously.</li>
+                        <li><strong>Registered User:</strong> Can submit feedback, view personal history, and manage account.</li>
+                        <li><strong>Admin:</strong> Can view, analyze, manage all feedback, access summaries, and sort data.</li>
+                    </ul>
+                </div>
+                <!-- Feature 2: Analysis & Storage -->
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2 border-b pb-1">Analysis & Storage</h3>
+                    <ul class="list-disc pl-5 space-y-1 text-gray-600">
+                        <li><strong>Feedback Types:</strong> Primarily text-based, with optional 1-5 star ratings.</li>
+                        <li><strong>Sentiment Analysis:</strong> Real-time classification (positive, negative, neutral) with polarity scores.</li>
+                        <li><strong>Data Storage:</strong> Structured database (SQLite, MySQL, or MongoDB) for all feedback and summaries.</li>
+                    </ul>
+                </div>
+                <!-- Feature 3: Visualization & Interaction -->
+                <div class="md:col-span-2">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2 border-b pb-1">Visualization & Interaction</h3>
+                    <ul class="list-disc pl-5 space-y-1 text-gray-600">
+                        <li><strong>Visualization:</strong> Dynamic charts (Chart.js / D3.js) for sentiment distribution and time trends.</li>
+                        <li><strong>Client-Server Interaction:</strong> RESTful APIs for submission (POST /api/feedback) and retrieval (GET /api/summary).</li>
+                        <li><strong>Security and Usability:</strong> Responsive UI, form validation, AJAX submissions, and role-based access control.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tools and Technologies -->
+        <section id="technologies" class="mb-10 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100 opacity-0 animated-card">
+            <h2 class="text-3xl font-bold text-blue-600 mb-4">Tools and Technologies</h2>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-gray-700">
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800">Frontend</h3>
+                    <p>HTML, Tailwind CSS, JavaScript (or React)</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800">Backend</h3>
+                    <p>Python with Django/Flask or Node.js</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800">Database</h3>
+                    <p>SQLite / MySQL / MongoDB</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800">Libraries</h3>
+                    <p>TextBlob/VADER (Analysis), Chart.js/D3.js (Viz)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Development Approach -->
+        <section id="development-approach" class="mb-10 bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-100 opacity-0 animated-card">
+            <h2 class="text-3xl font-bold text-blue-600 mb-4">Step-by-Step Development Approach</h2>
+            <ol class="list-decimal pl-5 space-y-3 text-gray-700">
+                <li><strong>Define Application Structure:</strong> Outline user roles, feedback types, data fields, and storage needs.</li>
+                <li><strong>Design Client-Server Interaction:</strong> Backend logic for storing/analyzing feedback; frontend layout and user flow; API routes.</li>
+                <li><strong>Full-Stack Development:</strong> Build responsive UI, set up server, integrate sentiment analysis, handle CRUD operations.</li>
+                <li><strong>Testing and Validation:</strong> Unit, integration, and UI testing to ensure reliability.</li>
+            </ol>
+        </section>
+
+        <!-- Our Mission -->
+        <section id="our-mission" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border-l-4 border-blue-500 opacity-0 animated-card">
+            <h2 class="text-3xl font-bold text-blue-600 mb-4">Our Mission</h2>
+            <p class="text-gray-700 italic">We are committed to providing an intuitive platform that empowers users to share their thoughts while offering administrators powerful tools to analyze and visualize data. Our system is built with scalability, security, and user-friendliness in mind, ensuring it evolves with your needs.</p>
+        </section>
+        
+    </main>
+
+    <!-- #################### FOOTER (Matching Index.html Style) #################### -->
+    <footer class="bg-gray-800 text-white p-6 mt-12">
+        <div class="max-w-7xl mx-auto text-center md:flex md:justify-between md:items-center text-sm">
+            <p>&copy; 2025 Smart Feedback Analysis and Visualization System. All rights reserved.</p>
+            <div class="mt-3 md:mt-0 space-x-4">
+                <a href="/" class="hover:text-blue-400 transition duration-200">Home</a>
+                <a href="/contact" class="hover:text-blue-400 transition duration-200">Contact Us</a>
+                <a href="/privacy" class="hover:text-blue-400 transition duration-200">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- #################### JAVASCRIPT FOR MOBILE MENU #################### -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const button = document.getElementById('mobile-menu-button');
+            const menu = document.getElementById('mobile-menu');
+            
+            if (button && menu) {
+                // Event listener to toggle the 'hidden' class on click
+                button.addEventListener('click', () => {
+                    menu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>
