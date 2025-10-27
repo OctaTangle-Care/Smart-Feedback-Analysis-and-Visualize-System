@@ -63,20 +63,7 @@
     </div>
   </div>
 </section>
-        {% comment %} <section class="bg-white p-6 rounded-xl shadow-xl mb-12">
-            <h2 class="text-lg font-medium text-gray-500 mb-2">Total Feedback Received</h2>
-            <p class="text-5xl font-extrabold text-blue-600">{{ total_feedback }}</p>
-
-             <h2 class="text-lg font-medium text-gray-400 mb-2">Total Positive Feedback Received</h2>
-            <p class="text-5xl font-extrabold text-blue-100">{{ positive }}</p>
-
-             <h2 class="text-lg font-medium text-gray-400 mb-2">Total Negative Feedback Received</h2>
-            <p class="text-5xl font-extrabold text-blue-600">{{ negative }}</p>
-
-             <h2 class="text-lg font-medium text-gray-400 mb-2">Total Neutral Feedback Received</h2>
-            <p class="text-5xl font-extrabold text-blue-600">{{ neutral }}</p>
-        </section> {% endcomment %}
-
+        
         <!-- Feedback Table -->
         <section class="bg-white p-6 rounded-xl shadow-2xl mb-12">
             <div class="flex justify-between items-center mb-4">
@@ -204,6 +191,21 @@
 </div>
 
        
+
+<!-- AVERAGE RATING PER CATEGORY -->
+<div class="chart-card">
+  <h3 class="text-xl font-semibold mb-2 text-blue-600">Average Rating per Product Category</h3>
+  <canvas id="categoryRatingChart"></canvas>
+  <p class="text-sm text-gray-500 mt-2">Shows average star rating per category (1–5 scale).</p>
+</div>
+
+<!-- CATEGORY-WISE SENTIMENT BREAKDOWN -->
+<div class="chart-card">
+  <h3 class="text-xl font-semibold mb-2 text-blue-600">Category-wise Sentiment Breakdown</h3>
+  <canvas id="categorySentimentChart"></canvas>
+  <p class="text-sm text-gray-500 mt-2">Compares sentiment distribution across product categories.</p>
+</div>
+
         </div>
     </main>
 
@@ -396,6 +398,56 @@ new Chart(document.getElementById('scatterPlot'), {
                     }
                 }
             }
+        }
+    }
+});
+
+
+
+
+// CATEGORY-WISE AVERAGE RATINGS
+const catLabels = {{ category_labels|safe }};
+const avgRatings = {{ avg_ratings|safe }};
+new Chart(document.getElementById('categoryRatingChart'), {
+    type: 'bar',
+    data: {
+        labels: catLabels,
+        datasets: [{
+            label: 'Average Rating',
+            data: avgRatings,
+            backgroundColor: '#3b82f6'
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true, max: 5, title: { display: true, text: 'Rating (1–5)' } },
+            x: { title: { display: true, text: 'Category' } }
+        }
+    }
+});
+
+// CATEGORY-WISE SENTIMENT COMPARISON
+const catPos = {{ cat_pos|safe }};
+const catNeg = {{ cat_neg|safe }};
+const catNeu = {{ cat_neu|safe }};
+
+new Chart(document.getElementById('categorySentimentChart'), {
+    type: 'bar',
+    data: {
+        labels: catLabels,
+        datasets: [
+            { label: 'Positive', data: catPos, backgroundColor: '#22c55e' },
+            { label: 'Negative', data: catNeg, backgroundColor: '#ef4444' },
+            { label: 'Neutral', data: catNeu, backgroundColor: '#eab308' },
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Feedback Count' } },
+            x: { stacked: true, title: { display: true, text: 'Category' } },
         }
     }
 });

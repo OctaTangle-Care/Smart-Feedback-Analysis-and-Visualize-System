@@ -1,4 +1,4 @@
-
+{% comment %} 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -56,7 +56,7 @@
             
             <!-- Desktop Navigation Links -->
             <nav class="hidden md:flex space-x-4">
-                {% comment %} <a href="/" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">Home</a> {% endcomment %}
+                {% comment %} <a href="/" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">Home</a> {% endcomment %
                 <a href="#" class="text-blue-600 font-semibold transition duration-300 px-3 py-2 rounded-lg bg-blue-50/50">Dashboard</a>
                 <a href="{% url 'aboutus' %}" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">About Us</a>
                 <a href="{% url 'logout' %}" class="border border-red-500 text-red-500 px-4 py-2 rounded-full font-medium hover:bg-red-50 transition duration-300">Logout</a>
@@ -72,7 +72,7 @@
         
         <!-- Mobile Menu Drawer -->
         <nav id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-1 bg-gray-50 border-t border-gray-200 transition-all duration-300 ease-in-out">
-            {% comment %} <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-200">Home</a> {% endcomment %}
+            {% comment %} <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-200">Home</a> {% endcomment %
             <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 bg-blue-100/50">Dashboard</a>
             <a href="{% url 'aboutus' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-200">About Us</a>
             <a href="{% url 'logout' %}" class="block w-full px-3 py-2 rounded-full text-base font-medium text-red-500 border border-red-500 text-center hover:bg-red-50 mt-2">Logout</a>
@@ -100,7 +100,24 @@
 
             <form method="POST" class="space-y-4">
                 {% csrf_token %}
-                
+                 <label for="category">Select Product Category:</label>
+    <select name="category" id="category" required>
+        {% comment %} <option value="">-- Choose Category --</option> {% endcomment %
+        {% for c in categories %}
+        <option value="{{ c.category_id }}">{{ c.category_name }}</option>
+
+            {% comment %} <option value="{{ c.id }}">{{ c.category_name }}</option> {% endcomment %
+        {% endfor %}
+    </select>
+
+    <label for="rating">Rate Product:</label>
+    <select name="rating" id="rating">
+        <option value="1">⭐</option>
+        <option value="2">⭐⭐</option>
+        <option value="3">⭐⭐⭐</option>
+        <option value="4">⭐⭐⭐⭐</option>
+        <option value="5">⭐⭐⭐⭐⭐</option>
+    </select>
                 <div>
                     <label for="feedback_text" class="block text-sm font-medium text-gray-700 mb-1">Your Feedback</label>
                     <textarea 
@@ -130,36 +147,20 @@
         <section class="bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100 animated-card history-section">
             <h2 class="text-2xl font-bold text-blue-600 mb-4">Your Feedback History</h2>
 
-            <!-- Sorting Controls -->
-            {% comment %} <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 space-y-3 sm:space-y-0">
-                <p class="text-gray-700 font-medium">Filter by Sentiment:</p>
-                <select id="sentiment-filter" class="w-full sm:w-auto p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-200 cursor-pointer" onchange="filterFeedback()">
-                    <option value="all">All Sentiments</option>
-                    <option value="Positive">Positive</option>
-                    <option value="Negative">Negative</option>
-                    <option value="Neutral">Neutral</option>
-                </select>
-            </div> {% endcomment %}
 
             <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
                 <table id="feedback-table" class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-blue-600 text-white">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Feedback</th>
-                            {% comment %} <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Category</th> {% endcomment %}
-                            {% comment %} <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sentiment</th> {% endcomment %}
-                            {% comment %} <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Score</th> {% endcomment %}
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Date</th>
+                           <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Date</th>
                         </tr>
                     </thead>
                     <tbody id="feedback-table-body" class="bg-white divide-y divide-gray-200">
                         {% for fb in user_feedbacks %}
                         <tr class="hover:bg-gray-50 even:bg-gray-50">
                             <td class="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{{ fb.feedback_text }}</td>
-                            {% comment %} <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{% if fb.category %}{{ fb.category.name }}{% else %}N/A{% endif %}</td> {% endcomment %}
-                            {% comment %} <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold {% if fb.sentiment_label == 'Positive' %}positive{% elif fb.sentiment_label == 'Negative' %}negative{% else %}neutral{% endif %}" data-sentiment="{{ fb.sentiment_label }}">{{ fb.sentiment_label }}</td> {% endcomment %}
-                            {% comment %} <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ fb.sentiment_score|floatformat:2 }}</td> {% endcomment %}
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ fb.created_at|date:'Y-m-d' }}</td>
+                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ fb.created_at|date:'Y-m-d' }}</td>
                         </tr>
                         {% empty %}
                         <tr id="no-feedback-row"><td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No feedback submitted yet.</td></tr>
@@ -168,6 +169,43 @@
                 </table>
             </div>
         </section>
+
+        <!-- Other Users' Feedback History -->
+<section class="mt-12 bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100 animated-card history-section">
+    <h2 class="text-2xl font-bold text-indigo-600 mb-4">Other Users' Feedback History</h2>
+    <p class="text-gray-500 mb-4">See what others are saying about the service.</p>
+
+    <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-indigo-600 text-white">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Feedback</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sentiment</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Date</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for fb in other_feedbacks %}
+                <tr class="hover:bg-gray-50 even:bg-gray-50 transition">
+                    <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ fb.mainuser.fullname}}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700 max-w-xs truncate">{{ fb.feedback_text }}</td>
+                    <td class="px-6 py-4 text-sm font-semibold 
+                        {% if fb.sentiment_label == 'positive' %}text-green-600
+                        {% elif fb.sentiment_label == 'negative' %}text-red-500
+                        {% else %}text-yellow-500{% endif %}">
+                        {{ fb.sentiment_label|title }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ fb.created_at|date:"Y-m-d" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No other feedbacks yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
         
     </main>
 
@@ -221,6 +259,259 @@
             // Initial filter application
             filterFeedback();
         });
+    </script>
+</body>
+</html> {% endcomment %}
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Feedback Analyzer</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font import for a professional look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        /* Apply Inter font and smooth scrolling */
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        /* Keyframe for a subtle card entrance animation */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Classes for staggered animation */
+        .animated-card {
+            animation: slideIn 0.8s ease-out forwards;
+            opacity: 0; /* Start hidden */
+        }
+        /* Staggered delays for different sections */
+        .header-section { animation-delay: 0s; }
+        .form-section { animation-delay: 0.2s; }
+        .user-history-section { animation-delay: 0.4s; }
+        .other-history-section { animation-delay: 0.6s; }
+
+        /* Custom style for the table header to ensure proper coloring */
+        th {
+            background-color: theme('colors.blue.600') !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+    <!-- #################### HEADER #################### -->
+    <header class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- Logo/Title -->
+            <div class="text-2xl font-extrabold text-gray-800 tracking-tight">
+                <span class="text-blue-600">Smart</span> Analyzer
+            </div>
+            
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex space-x-4 items-center">
+                <a href="#" class="text-blue-600 font-semibold transition duration-300 px-3 py-2 rounded-lg bg-blue-50/50">Dashboard</a>
+                <a href="{% url 'aboutus' %}" class="text-gray-600 hover:text-blue-600 transition duration-300 px-3 py-2 rounded-lg">About Us</a>
+                <a href="{% url 'logout' %}" class="border border-red-500 text-red-500 px-4 py-2 rounded-full font-medium hover:bg-red-50 transition duration-300">Logout</a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-button" class="md:hidden p-2 text-gray-600 hover:text-blue-600 rounded-lg hover:bg-gray-100 transition duration-150">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu Drawer -->
+        <nav id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-1 bg-gray-50 border-t border-gray-200 transition-all duration-300 ease-in-out">
+            <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-blue-600 bg-blue-100/50">Dashboard</a>
+            <a href="{% url 'aboutus' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-200">About Us</a>
+            <a href="{% url 'logout' %}" class="block w-full px-3 py-2 rounded-full text-base font-medium text-red-500 border border-red-500 text-center hover:bg-red-50 mt-2">Logout</a>
+        </nav>
+    </header>
+
+    <!-- #################### MAIN CONTENT #################### -->
+    <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 flex-grow">
+
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-2 animated-card header-section">Welcome, {{ user.fullname|default:'User' }}!</h1>
+        <p class="text-gray-500 mb-10 animated-card header-section" style="animation-delay: 0.1s;">Manage your feedback submissions and view analysis history below.</p>
+
+        <!-- Submit New Feedback Form -->
+        <section class="mb-12 bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100 animated-card form-section">
+            <h2 class="text-2xl font-bold text-blue-600 mb-6 border-b pb-3 border-gray-100">Submit New Feedback</h2>
+            
+            <!-- Message Display Area (for Django messages) -->
+            {% if messages %}
+                <div class="p-3 mb-6 rounded-lg bg-green-100 text-green-700 font-medium border border-green-200" role="alert">
+                    {% for msg in messages %}
+                        <p>{{ msg }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Category and Rating Inputs in a responsive grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Category Selection -->
+                    <div>
+                        <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Select Product Category:</label>
+                        <select name="category" id="category" required 
+                                class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition duration-150 text-gray-700">
+                            {% for c in categories %}
+                            <option value="">Select Category</option>
+                                <option value="{{ c.category_id }}">{{ c.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Rating Selection -->
+                    <div>
+                        <label for="rating" class="block text-sm font-medium text-gray-700 mb-1">Rate Product:</label>
+                        <select name="rating" id="rating" 
+                                class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition duration-150 text-gray-700">
+                           <option value="">Select Rating</option>
+                                <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
+                            <option value="4">⭐⭐⭐⭐ (Good)</option>
+                            <option value="3">⭐⭐⭐ (Average)</option>
+                            <option value="2">⭐⭐ (Poor)</option>
+                            <option value="1">⭐ (Terrible)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Feedback Textarea -->
+                <div>
+                    <label for="feedback_text" class="block text-sm font-medium text-gray-700 mb-1">Your Feedback</label>
+                    <textarea 
+                        id="feedback_text"
+                        name="feedback_text" 
+                        rows="4" 
+                        placeholder="Enter your feedback here. It will be analyzed upon submission." 
+                        required
+                        class="w-full p-4 border border-gray-300 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition duration-300 text-gray-700 shadow-inner resize-y"
+                    ></textarea>
+                </div>
+                
+                <!-- Submission Button -->
+                <button type="submit" 
+                    class="w-full sm:w-auto py-3 px-8 text-lg font-bold rounded-xl text-white 
+                           bg-gradient-to-r from-blue-600 to-indigo-600 
+                           hover:from-blue-700 hover:to-indigo-700 
+                           transition duration-300 transform hover:scale-[1.01]
+                           shadow-lg shadow-blue-300/50 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:ring-opacity-50"
+                >
+                    Submit Feedback
+                </button>
+            </form>
+        </section>
+
+        <!-- User Feedback History -->
+        <section class="mb-12 bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100 animated-card user-history-section">
+            <h2 class="text-2xl font-bold text-blue-600 mb-6 border-b pb-3 border-gray-100">Your Feedback History</h2>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+                <table id="feedback-table" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">Feedback</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Date Submitted</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedback-table-body" class="bg-white divide-y divide-gray-200">
+                        {% for fb in user_feedbacks %}
+                        <tr class="hover:bg-blue-50/50 transition duration-150">
+                            <td class="px-6 py-4 text-sm text-gray-900 max-w-xs xl:max-w-md truncate">{{ fb.feedback_text }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ fb.created_at|date:'Y-m-d' }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">No feedback submitted yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Other Users' Feedback History -->
+        <section class="mt-12 bg-white p-6 sm:p-8 rounded-xl shadow-2xl border border-gray-100 animated-card other-history-section">
+            <h2 class="text-2xl font-bold text-indigo-600 mb-6 border-b pb-3 border-gray-100">Public Feedback Overview</h2>
+            <p class="text-gray-500 mb-6">See what others are saying about the service.</p>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-indigo-600 text-white">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tl-lg">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Feedback</th>
+                            {% comment %} <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Sentiment</th> {% endcomment %}
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider rounded-tr-lg">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for fb in other_feedbacks %}
+                        <tr class="hover:bg-indigo-50/50 transition duration-150">
+                            <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ fb.mainuser.fullname|default:'Anonymous' }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-700 max-w-xs xl:max-w-sm truncate">{{ fb.feedback_text }}</td>
+                            {% comment %} <td class="px-6 py-4 whitespace-nowrap">
+                                <!-- Sentiment Badge -->
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                    {% if fb.sentiment_label == 'positive' %}bg-green-100 text-green-800
+                                    {% elif fb.sentiment_label == 'negative' %}bg-red-100 text-red-800
+                                    {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                    {{ fb.sentiment_label|title }}
+                                </span>
+                            </td> {% endcomment %}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ fb.created_at|date:"Y-m-d" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No other feedbacks yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+    </main>
+
+    <!-- #################### FOOTER #################### -->
+    <footer class="bg-gray-800 text-white p-6 mt-12">
+        <div class="max-w-7xl mx-auto text-center md:flex md:justify-between md:items-center text-sm">
+            <p>&copy; 2025 Smart Feedback Analysis and Visualization System. All rights reserved.</p>
+            <div class="mt-3 md:mt-0 space-x-4">
+                <a href="/" class="hover:text-blue-400 transition duration-200">Home</a>
+                <a href="/contact" class="hover:text-blue-400 transition duration-200">Contact Us</a>
+                <a href="/privacy" class="hover:text-blue-400 transition duration-200">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- #################### JAVASCRIPT FOR MOBILE MENU #################### -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Mobile Menu Toggle Logic ---
+            const button = document.getElementById('mobile-menu-button');
+            const menu = document.getElementById('mobile-menu');
+            if (button && menu) {
+                button.addEventListener('click', () => {
+                    // Toggle the 'hidden' class to show/hide the menu
+                    menu.classList.toggle('hidden');
+                });
+            }
+        });
+        // Note: The previous feedback filtering script was removed as its dependencies (filter element and data attributes) were not available in the template.
     </script>
 </body>
 </html>

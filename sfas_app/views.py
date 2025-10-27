@@ -7,25 +7,77 @@
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import MainUser, Feedback
+from .models import MainUser, Feedback, ProductCategory
 from django.contrib.auth.hashers import make_password, check_password
+# from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
+# # Initialize Sentiment Analyzer
+# analyzer = SentimentIntensityAnalyzer()
+
+
+# def analyze_sentiment(feedback_text):
+#     scores = analyzer.polarity_scores(feedback_text)
+#     compound = scores['compound']
+#     if compound >= 0.05:
+#         label = 'positive'
+#     elif compound <= -0.05:
+#         label = 'negative'
+#     else:
+#         label = 'neutral'
+#     return label, compound
+
+
+
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-# Initialize Sentiment Analyzer
+# Initialize VADER sentiment analyzer
 analyzer = SentimentIntensityAnalyzer()
 
 
-def analyze_sentiment(feedback_text):
+def analyze_sentiment(feedback_text, category, rating):
+    """
+    Analyze sentiment for a given feedback text, with optional category and star rating.
+    Returns sentiment label, compound score, and adjusted rating sentiment.
+    """
+
+    # Step 1: Base sentiment from feedback text
     scores = analyzer.polarity_scores(feedback_text)
     compound = scores['compound']
+
+    # Step 2: Determine base label
     if compound >= 0.05:
         label = 'positive'
     elif compound <= -0.05:
         label = 'negative'
     else:
         label = 'neutral'
-    return label, compound
 
+    # Step 3: Adjust compound score slightly based on user rating (if provided)
+    if rating:
+        try:
+            rating = int(rating)
+            # Normalize rating (1–5) → (-1 to +1)
+            normalized_rating = (rating - 3) / 2  
+            compound = (compound + normalized_rating) / 2  
+            # Recalculate sentiment label based on adjusted score
+            if compound >= 0.05:
+                label = 'positive'
+            elif compound <= -0.05:
+                label = 'negative'
+            else:
+                label = 'neutral'
+        except ValueError:
+            pass  # Ignore invalid rating input
+
+    # Step 4: Return structured result
+    # result = {
+    #     "label": label,
+    #     "score": round(compound, 3),
+    #     "category": category or "General",
+    #     "rating": rating or "N/A",
+    # }
+
+    return label, round(compound, 3)
 
 # # Helper function to hash passwords
 # def hash_password(password):
@@ -119,11 +171,15 @@ from django.db.models import F
 from .models import Feedback, SentimentSummary
 
 def home(request):
+    categories = ProductCategory.objects.all()
     if request.method == "POST":
+        category_id = request.POST.get("category")
+        rating = request.POST.get("rating")
         feedback_text = request.POST.get("feedback_text")
+        category = ProductCategory.objects.filter(category_id=category_id).first() if category_id else None
         # category_id = request.POST.get("category")
-
-        sentiment_label, sentiment_score = analyze_sentiment(feedback_text)
+        sentiment_label, sentiment_score = analyze_sentiment(feedback_text, category, rating)
+        # sentiment_label, sentiment_score = analyze_sentiment(feedback_text)
         # print(f"Sentiment: {sentiment_label}, Score: {sentiment_result}")
         # Anonymous user (no session)
         mainuser = None
@@ -131,12 +187,24 @@ def home(request):
         # sentiment_score = sentiment_result.get('score', 0.0)  # ✅ Safely get the float value
         print(f"Sentiment: {sentiment_label}, Score: {sentiment_score}")
         # Save feedback
+        # Feedback.objects.create(
+        #     mainuser=mainuser,
+        #     feedback_text=feedback_text,
+        #     sentiment_label=sentiment_label,
+        #     sentiment_score=sentiment_score
+        # )
+        # sentiment_label, sentiment_score = analyze_sentiment(feedback_text,category, rating)
+
         Feedback.objects.create(
-            mainuser=mainuser,
+            mainuser=None,
             feedback_text=feedback_text,
+            category=category,
+            rating=rating if rating else None,
             sentiment_label=sentiment_label,
-            sentiment_score=sentiment_score
+            sentiment_score=sentiment_score,
+            
         )
+
 
         # Update SentimentSummary
         summary, created = SentimentSummary.objects.get_or_create(summary_id=1)
@@ -155,11 +223,11 @@ def home(request):
         messages.success(request, f"Feedback analyzed as {sentiment_label.upper()} ({sentiment_score})")
         return redirect('feedback_success')
 
-    return render(request, 'home.html')
+    return render(request, 'home.html', {'categories': categories})
 
 
 from django.db.models import F
-from .models import Feedback, SentimentSummary
+from .models import Feedback, SentimentSummary, ProductCategory
 
 def user_dashboard(request):
     user_id = request.session.get('user_id')
@@ -168,20 +236,33 @@ def user_dashboard(request):
 
     user = MainUser.objects.get(pk=user_id)
     user_feedbacks = Feedback.objects.filter(mainuser=user).order_by('-created_at')
+    categories = ProductCategory.objects.all()
+    
+    # Fetch other users' feedbacks
+    other_feedbacks = Feedback.objects.exclude(mainuser=user).select_related('mainuser').order_by('-created_at')[:10]
+
 
     if request.method == "POST":
         feedback_text = request.POST.get("feedback_text")
         category_id = request.POST.get("category")
-        # category = Categories.objects.get(pk=category_id) if category_id else None
-
-        sentiment_label, sentiment_score = analyze_sentiment(feedback_text)
+        rating = request.POST.get("rating")
+        
+        category = ProductCategory.objects.filter(category_id=category_id).first() if category_id else None
+        # print(f"Category selected: {category.category_id if category else 'None'}")
+        print(f"Category selected: {category_id} -> {category}")
+        # category = ProductCategory.objects.filter(pk=category_id).first() if category_id else None
+        # # category = ProductCategory.objects.get(id=category_id) if category_id else None
+        # print(f"Category selected: {category.category_id if category else 'None'}")
+        sentiment_label, sentiment_score = analyze_sentiment(feedback_text,category, rating)
 
         Feedback.objects.create(
             mainuser=user,
             feedback_text=feedback_text,
+            category=category,
+            rating=rating if rating else None,
             sentiment_label=sentiment_label,
-            sentiment_score=sentiment_score
-            # category=category
+            sentiment_score=sentiment_score,
+            
         )
 
         # Update SentimentSummary
@@ -203,7 +284,9 @@ def user_dashboard(request):
 
     return render(request, 'user_dashboard.html', {
         'user': user,
-        'user_feedbacks': user_feedbacks
+        'user_feedbacks': user_feedbacks,
+        'other_feedbacks': other_feedbacks,
+        'categories': categories
     })
     
     
@@ -223,10 +306,106 @@ def aboutus(request):
 
 
 
+# from django.shortcuts import render, redirect
+# from django.db.models import Q, Count, Avg
+# from django.db.models.functions import TruncDate
+# from .models import MainUser, Feedback, SentimentSummary
+# import re
+# from collections import Counter
+
+# def admin_dashboard(request):
+#     admin_id = request.session.get('user_id')
+#     admin = MainUser.objects.filter(pk=admin_id, role='admin').first()
+#     if not admin:
+#         return redirect('login')
+
+#     feedbacks = Feedback.objects.all().order_by('created_at')  # ascending for visualization
+#     total_feedback = feedbacks.count()
+#     positive = feedbacks.filter(sentiment_label='positive').count()
+#     negative = feedbacks.filter(sentiment_label='negative').count()
+#     neutral = feedbacks.filter(sentiment_label='neutral').count()
+
+#     avg_positive = feedbacks.filter(sentiment_label='positive').aggregate(avg=Avg('sentiment_score'))['avg'] or 0
+#     avg_negative = feedbacks.filter(sentiment_label='negative').aggregate(avg=Avg('sentiment_score'))['avg'] or 0
+#     avg_neutral = feedbacks.filter(sentiment_label='neutral').aggregate(avg=Avg('sentiment_score'))['avg'] or 0
+
+#     satisfaction_score = ((positive - negative) / total_feedback) * 50 + 50 if total_feedback > 0 else 50
+
+#     # Sentiment trends
+#     trends = feedbacks.annotate(date=TruncDate('created_at')).values('date').annotate(
+#         positive_count=Count('feedback_id', filter=Q(sentiment_label='positive')),
+#         negative_count=Count('feedback_id', filter=Q(sentiment_label='negative')),
+#         neutral_count=Count('feedback_id', filter=Q(sentiment_label='neutral'))
+#     ).order_by('date')
+
+#     trend_dates = [t['date'].strftime('%Y-%m-%d') for t in trends]
+#     positive_trends = [t['positive_count'] for t in trends]
+#     negative_trends = [t['negative_count'] for t in trends]
+#     neutral_trends = [t['neutral_count'] for t in trends]
+
+#     # Prepare scatter plot data (each point = one feedback)
+#     scatter_data = []
+#     for i, f in enumerate(feedbacks):
+#         sentiment_color = (
+#             '#22c55e' if f.sentiment_label == 'positive' else
+#             '#ef4444' if f.sentiment_label == 'negative' else
+#             '#eab308'
+#         )
+#         scatter_data.append({
+#             'x': i + 1,
+#             'y': round(f.sentiment_score or 0, 2),
+#             'label': f.sentiment_label.capitalize(),
+#             'backgroundColor': sentiment_color,
+#         })
+
+#     # Word cloud preparation (optional, from earlier step)
+#     all_text = " ".join([f.feedback_text.lower() for f in feedbacks])
+#     words = re.findall(r'\b[a-z]{3,}\b', all_text)
+#     stopwords = {'the','and','for','you','are','this','that','with','have','was','but','not','from','your','all','has','had','will','can','our','they','what','when','how','why','about','more','been','very'}
+#     filtered_words = [w for w in words if w not in stopwords]
+#     word_counts = Counter(filtered_words).most_common(30)
+#     wordcloud_data = [[word, count] for word, count in word_counts]
+
+#     pie_labels = ['Positive', 'Negative', 'Neutral']
+#     pie_data = [positive, negative, neutral]
+#     radar_labels = ['Positive', 'Negative', 'Neutral']
+#     radar_data = [avg_positive, abs(avg_negative), avg_neutral]
+
+#     summary, _ = SentimentSummary.objects.get_or_create(pk=1)
+#     summary.positive_count = positive
+#     summary.negative_count = negative
+#     summary.neutral_count = neutral
+#     summary.total_feedback = total_feedback
+#     summary.save()
+
+#     return render(request, 'admin_dashboard.html', {
+#         'admin': admin,
+#         'feedbacks': feedbacks,
+#         'total_feedback': total_feedback,
+#         'positive': positive,
+#         'negative': negative,
+#         'neutral': neutral,
+#         'summary': summary,
+#         'chart_labels': pie_labels,
+#         'chart_data': pie_data,
+#         'trend_dates': trend_dates,
+#         'positive_trends': positive_trends,
+#         'negative_trends': negative_trends,
+#         'neutral_trends': neutral_trends,
+#         'radar_labels': radar_labels,
+#         'radar_data': radar_data,
+#         'satisfaction_score': satisfaction_score,
+#         'wordcloud_data': wordcloud_data,
+#         'scatter_data': scatter_data,  # 👈 NEW data
+#     })
+
+
+
+
 from django.shortcuts import render, redirect
 from django.db.models import Q, Count, Avg
 from django.db.models.functions import TruncDate
-from .models import MainUser, Feedback, SentimentSummary
+from .models import MainUser, Feedback, SentimentSummary, ProductCategory
 import re
 from collections import Counter
 
@@ -236,7 +415,7 @@ def admin_dashboard(request):
     if not admin:
         return redirect('login')
 
-    feedbacks = Feedback.objects.all().order_by('created_at')  # ascending for visualization
+    feedbacks = Feedback.objects.select_related('category').all().order_by('created_at')
     total_feedback = feedbacks.count()
     positive = feedbacks.filter(sentiment_label='positive').count()
     negative = feedbacks.filter(sentiment_label='negative').count()
@@ -248,7 +427,7 @@ def admin_dashboard(request):
 
     satisfaction_score = ((positive - negative) / total_feedback) * 50 + 50 if total_feedback > 0 else 50
 
-    # Sentiment trends
+    # 📈 Sentiment trends over time
     trends = feedbacks.annotate(date=TruncDate('created_at')).values('date').annotate(
         positive_count=Count('feedback_id', filter=Q(sentiment_label='positive')),
         negative_count=Count('feedback_id', filter=Q(sentiment_label='negative')),
@@ -260,10 +439,10 @@ def admin_dashboard(request):
     negative_trends = [t['negative_count'] for t in trends]
     neutral_trends = [t['neutral_count'] for t in trends]
 
-    # Prepare scatter plot data (each point = one feedback)
+    # 🟢 Scatter plot
     scatter_data = []
     for i, f in enumerate(feedbacks):
-        sentiment_color = (
+        color = (
             '#22c55e' if f.sentiment_label == 'positive' else
             '#ef4444' if f.sentiment_label == 'negative' else
             '#eab308'
@@ -272,10 +451,10 @@ def admin_dashboard(request):
             'x': i + 1,
             'y': round(f.sentiment_score or 0, 2),
             'label': f.sentiment_label.capitalize(),
-            'backgroundColor': sentiment_color,
+            'backgroundColor': color,
         })
 
-    # Word cloud preparation (optional, from earlier step)
+    # ☁️ Word cloud
     all_text = " ".join([f.feedback_text.lower() for f in feedbacks])
     words = re.findall(r'\b[a-z]{3,}\b', all_text)
     stopwords = {'the','and','for','you','are','this','that','with','have','was','but','not','from','your','all','has','had','will','can','our','they','what','when','how','why','about','more','been','very'}
@@ -283,11 +462,26 @@ def admin_dashboard(request):
     word_counts = Counter(filtered_words).most_common(30)
     wordcloud_data = [[word, count] for word, count in word_counts]
 
-    pie_labels = ['Positive', 'Negative', 'Neutral']
-    pie_data = [positive, negative, neutral]
-    radar_labels = ['Positive', 'Negative', 'Neutral']
-    radar_data = [avg_positive, abs(avg_negative), avg_neutral]
+    # 🧩 Category-wise sentiment and ratings
+    category_stats = (
+        feedbacks.values('category__category_name')
+        .annotate(
+            avg_rating=Avg('rating'),
+            positive=Count('feedback_id', filter=Q(sentiment_label='positive')),
+            negative=Count('feedback_id', filter=Q(sentiment_label='negative')),
+            neutral=Count('feedback_id', filter=Q(sentiment_label='neutral')),
+            total=Count('feedback_id')
+        )
+        .order_by('category__category_name')
+    )
 
+    category_labels = [c['category__category_name'] or 'Uncategorized' for c in category_stats]
+    avg_ratings = [round(c['avg_rating'] or 0, 2) for c in category_stats]
+    cat_pos = [c['positive'] for c in category_stats]
+    cat_neg = [c['negative'] for c in category_stats]
+    cat_neu = [c['neutral'] for c in category_stats]
+
+    # 🧠 Sentiment summary update
     summary, _ = SentimentSummary.objects.get_or_create(pk=1)
     summary.positive_count = positive
     summary.negative_count = negative
@@ -295,6 +489,7 @@ def admin_dashboard(request):
     summary.total_feedback = total_feedback
     summary.save()
 
+    # 📊 Return context
     return render(request, 'admin_dashboard.html', {
         'admin': admin,
         'feedbacks': feedbacks,
@@ -303,17 +498,23 @@ def admin_dashboard(request):
         'negative': negative,
         'neutral': neutral,
         'summary': summary,
-        'chart_labels': pie_labels,
-        'chart_data': pie_data,
+        'chart_labels': ['Positive', 'Negative', 'Neutral'],
+        'chart_data': [positive, negative, neutral],
         'trend_dates': trend_dates,
         'positive_trends': positive_trends,
         'negative_trends': negative_trends,
         'neutral_trends': neutral_trends,
-        'radar_labels': radar_labels,
-        'radar_data': radar_data,
+        'radar_labels': ['Positive', 'Negative', 'Neutral'],
+        'radar_data': [avg_positive, abs(avg_negative), avg_neutral],
         'satisfaction_score': satisfaction_score,
         'wordcloud_data': wordcloud_data,
-        'scatter_data': scatter_data,  # 👈 NEW data
+        'scatter_data': scatter_data,
+        # new category/rating data
+        'category_labels': category_labels,
+        'avg_ratings': avg_ratings,
+        'cat_pos': cat_pos,
+        'cat_neg': cat_neg,
+        'cat_neu': cat_neu,
     })
 
 
@@ -414,3 +615,41 @@ def download_feedbacks(request, file_format):
 
     else:
         return HttpResponse("Invalid file format. Use 'csv' or 'xlsx'.", status=400)
+
+
+
+from django.contrib import messages
+
+from django.core.mail import send_mail
+from .models import MainUser, Feedback
+
+def contact_us(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+        
+        # Email configuration (replace with your admin email)
+        admin_email = 'admin@example.com'  # Update this with the actual admin email
+        subject = f'New Contact Message from {name}'
+        body = f'Name: {name}\nEmail: {email}\nMessage: {message}'
+        from_email = email
+        
+        try:
+            send_mail(
+                subject,
+                body,
+                from_email,
+                [admin_email],
+                fail_silently=False,
+            )
+            messages.success(request, 'Your message has been sent successfully!')
+        except Exception as e:
+            messages.error(request, 'Failed to send your message. Please try again later.')
+    
+    return render(request, 'contact_us.html')
+
+
+
+def privacy_policy(request):
+    return render(request, 'privacy_policy.html')

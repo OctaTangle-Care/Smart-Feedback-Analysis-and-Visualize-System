@@ -20,11 +20,37 @@ class MainUser(models.Model):
 
     def __str__(self):
         return self.fullname
+    
+    
 
+
+# -------------------------------------------------------
+#  PRODUCT CATEGORY MODEL
+# -------------------------------------------------------
+class ProductCategory(models.Model):
+    category_id = models.AutoField(primary_key=True)
+    category_name = models.CharField(max_length=100, unique=True, null=False)
+
+    def __str__(self):
+        return self.category_name
+
+
+# -------------------------------------------------------
+#  FEEDBACK MODEL
+# -------------------------------------------------------
 class Feedback(models.Model):
+    RATING_CHOICES = [
+        (1, '⭐'),
+        (2, '⭐⭐'),
+        (3, '⭐⭐⭐'),
+        (4, '⭐⭐⭐⭐'),
+        (5, '⭐⭐⭐⭐⭐'),
+    ]
     feedback_id = models.AutoField(primary_key=True)
     mainuser = models.ForeignKey(MainUser, on_delete=models.SET_NULL, null=True)  # Null for guests
+    category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, null=True, blank=True)  # e.g., Laptop, Toys
     feedback_text = models.TextField(null=False)
+    rating = models.IntegerField(choices=RATING_CHOICES, null=True, blank=True)  # Star rating (1-5)
     sentiment_label = models.CharField(max_length=10, null=True)  # e.g., 'positive', 'negative', 'neutral'
     sentiment_score = models.FloatField(null=True)  # e.g., -1 to 1
     created_at = models.DateTimeField(auto_now_add=True, null=False)
