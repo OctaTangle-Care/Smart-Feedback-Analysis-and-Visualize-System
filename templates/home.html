@@ -293,8 +293,9 @@
                         <select name="category" id="category" required 
                                 class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 transition duration-150 text-gray-700">
                             <!-- Preserve Django loop for categories -->
+                              <option value="">Select Category</option>
                             {% for c in categories %}
-                            <option value="">Select Category</option>
+                           
                                 <option value="{{ c.category_id }}">{{ c.category_name }}</option>
                             {% endfor %}
                         </select>

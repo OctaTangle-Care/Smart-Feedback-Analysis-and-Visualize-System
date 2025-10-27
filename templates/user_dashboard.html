@@ -371,8 +371,9 @@
                         <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Select Product Category:</label>
                         <select name="category" id="category" required 
                                 class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/50 transition duration-150 text-gray-700">
+                                <option value="">Select Category</option>
                             {% for c in categories %}
-                            <option value="">Select Category</option>
+                            
                                 <option value="{{ c.category_id }}">{{ c.category_name }}</option>
                             {% endfor %}
                         </select>
@@ -491,9 +492,9 @@
         <div class="max-w-7xl mx-auto text-center md:flex md:justify-between md:items-center text-sm">
             <p>&copy; 2025 Smart Feedback Analysis and Visualization System. All rights reserved.</p>
             <div class="mt-3 md:mt-0 space-x-4">
-                <a href="/" class="hover:text-blue-400 transition duration-200">Home</a>
-                <a href="/contact" class="hover:text-blue-400 transition duration-200">Contact Us</a>
-                <a href="/privacy" class="hover:text-blue-400 transition duration-200">Privacy Policy</a>
+                {% comment %} <a href="/" class="hover:text-blue-400 transition duration-200">Home</a> {% endcomment %}
+                <a href="/contact_us" class="hover:text-blue-400 transition duration-200">Contact Us</a>
+                <a href="/privacy_policy" class="hover:text-blue-400 transition duration-200">Privacy Policy</a>
             </div>
         </div>
     </footer>
