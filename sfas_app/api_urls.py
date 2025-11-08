@@ -9,5 +9,4 @@ urlpatterns = [
     path('feedbacks/<int:feedback_id>/delete/', api_views.DeleteFeedbackAPIView.as_view(), name='api_delete_feedback'),
     path('summary/', api_views.SentimentSummaryAPIView.as_view(), name='api_summary'),
     path('admin/analytics/', api_views.AdminAnalyticsAPIView.as_view(), name='api_admin_analytics'),
-    path('logout/', api_views.LogoutAPIView.as_view(), name='api_logout'),
 ]
