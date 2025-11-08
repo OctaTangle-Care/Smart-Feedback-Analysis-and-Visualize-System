@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('sfas_app.urls')),
+    path('api/', include('sfas_app.api_urls')),  # for REST APIs
 ]

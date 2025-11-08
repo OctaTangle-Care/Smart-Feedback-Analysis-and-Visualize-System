@@ -3,7 +3,7 @@
 
 
 
-
+ 
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -91,6 +91,9 @@ from .models import MainUser, Feedback
 
 # ---------- REGISTER ----------
 def register(request):
+    storage = messages.get_messages(request)
+    for _ in storage:
+        pass  # This clears existing messages
     if request.method == 'POST':
         fullname = request.POST.get('fullname')
         email = request.POST.get('email')
@@ -115,6 +118,10 @@ def register(request):
             phonenumber=phonenumber,
             role=role
         )
+        storage = messages.get_messages(request)
+        for _ in storage:
+            pass  # This clears existing messages
+
         messages.success(request, "Registration successful! Please login.")
         return redirect('login')
 
@@ -126,6 +133,9 @@ def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        storage = messages.get_messages(request)
+        for _ in storage:
+            pass  # This clears existing messages
 
         try:
             user = MainUser.objects.get(email=email)
@@ -143,6 +153,10 @@ def login_view(request):
             else:
                 return redirect('user_dashboard')
         else:
+            storage = messages.get_messages(request)
+            for _ in storage:
+                pass  # This clears existing messages
+
             messages.error(request, "Invalid email or password.")
             return redirect('login')
 
@@ -152,7 +166,7 @@ def login_view(request):
 # ---------- LOGOUT ----------
 def logout_view(request):
     request.session.flush()
-    messages.success(request, "You have been logged out.")
+    # messages.success(request, "You have been logged out.")
     return redirect('home')
 
 
@@ -220,7 +234,7 @@ def home(request):
         summary.save()
         summary.refresh_from_db()  # Ensure updated values are loaded
 
-        messages.success(request, f"Feedback analyzed as {sentiment_label.upper()} ({sentiment_score})")
+        # messages.success(request, f"Feedback analyzed as {sentiment_label.upper()} ({sentiment_score})")
         return redirect('feedback_success')
 
     return render(request, 'home.html', {'categories': categories})
@@ -230,6 +244,10 @@ from django.db.models import F
 from .models import Feedback, SentimentSummary, ProductCategory
 
 def user_dashboard(request):
+    storage = messages.get_messages(request)
+    for _ in storage:
+        pass  # This clears existing messages
+
     user_id = request.session.get('user_id')
     if not user_id:
         return redirect('login')
@@ -239,7 +257,7 @@ def user_dashboard(request):
     categories = ProductCategory.objects.all()
     
     # Fetch other users' feedbacks
-    other_feedbacks = Feedback.objects.exclude(mainuser=user).select_related('mainuser').order_by('-created_at')[:10]
+    other_feedbacks = Feedback.objects.exclude(mainuser=user).select_related('mainuser').order_by('-created_at')[:]
 
 
     if request.method == "POST":
@@ -279,7 +297,7 @@ def user_dashboard(request):
         summary.save()
         summary.refresh_from_db()
 
-        messages.success(request, f"Feedback analyzed as {sentiment_label.upper()} ({sentiment_score})")
+        # messages.success(request, f"Feedback analyzed as {sentiment_label.upper()} ({sentiment_score})")
         return redirect('feedback_success')
 
     return render(request, 'user_dashboard.html', {
@@ -410,6 +428,10 @@ import re
 from collections import Counter
 
 def admin_dashboard(request):
+    storage = messages.get_messages(request)
+    for _ in storage:
+        pass  # This clears existing messages
+
     admin_id = request.session.get('user_id')
     admin = MainUser.objects.filter(pk=admin_id, role='admin').first()
     if not admin:
@@ -653,3 +675,53 @@ def contact_us(request):
 
 def privacy_policy(request):
     return render(request, 'privacy_policy.html')
+
+
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from .models import Feedback, SentimentSummary
+
+def delete_feedback(request, feedback_id):
+    user_id = request.session.get('user_id')
+    user = MainUser.objects.get(pk=user_id)
+    feedback = get_object_or_404(Feedback, feedback_id=feedback_id)
+
+    # Update sentiment summary before deletion
+    try:
+        summary = SentimentSummary.objects.first()
+        if summary:
+            if feedback.sentiment_label == 'positive':
+                summary.positive_count = max(0, summary.positive_count - 1)
+            elif feedback.sentiment_label == 'negative':
+                summary.negative_count = max(0, summary.negative_count - 1)
+            elif feedback.sentiment_label == 'neutral':
+                summary.neutral_count = max(0, summary.neutral_count - 1)
+            summary.total_feedback = max(0, summary.total_feedback - 1)
+            summary.save()
+    except SentimentSummary.DoesNotExist:
+        pass  # Optional: log or handle missing summary
+
+    feedback.delete()
+
+    # Send only success message and redirect
+    messages.success(request, "Feedback deleted successfully.")
+    if user.role == 'admin':
+        return redirect('admin_dashboard')
+    else:
+        return redirect('user_dashboard')
+    # return redirect('feedback_list')  # Replace with your actual URL name
+    
+    
+    
+
+
+    # return redirect('dashboard ')
+
+def dashboard(request):
+    role = request.session.get('role')
+    if role == 'admin':
+        return redirect('admin_dashboard')
+    else:
+        return redirect('user_dashboard')

@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 from django.db import models
-
+ 
 class MainUser(models.Model):
     user_id = models.AutoField(primary_key=True)
     fullname = models.CharField(max_length=100, null=False)
